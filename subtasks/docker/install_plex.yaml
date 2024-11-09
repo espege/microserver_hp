@@ -1,0 +1,3 @@
+- name: Install Plex
+  include_role:
+    name: docker_apps/plex

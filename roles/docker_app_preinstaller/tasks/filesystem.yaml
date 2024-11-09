@@ -1,0 +1,44 @@
+# roles/docker_app_preinstaller/tasks/copy_bind.yaml
+
+  - name: Ansible | Manage non-file type bindings
+    when: bind.file_name is not defined
+    block: 
+      - name: Determine fully qualified path - binding to dir
+        ansible.builtin.set_fact:
+          bind_files_v3:
+            bind_full_src: "{{ bind_files_v3.bind_full_src | default([]) + [ bind.dir_name ] }}" 
+            bind_full_dst: "{{ bind_files_v3.bind_full_dst | default([]) + [ bind.bind_to ] }}"
+    
+  - name: Linux | Handle file type bindings
+    when: bind.file_name is defined and bind.file_name != ""
+    tags: filesystem,files  
+    block:
+    - name: Determine fully qualified path - binding to file
+      ansible.builtin.set_fact:
+        bind_files_v3:
+          bind_full_src: "{{ bind_files_v3.bind_full_src | default([]) + [ bind.dir_name + '/' + (bind.file_name | split('/'))[-1] | replace('.j2', '') ] }}" # Append to self, then use loop index to find matches
+          bind_full_dst: "{{ bind_files_v3.bind_full_dst | default([]) + [ bind.bind_to + '/' + (bind.file_name | split('/'))[-1] | replace('.j2', '') ] }}" # Append to self, then use loop index to find matches
+        lookup_type: "{{ ('j2' in bind.file_name) | ternary('template', 'file') }}"
+
+    - name: Linux | Copy binding file
+      ansible.builtin.copy:
+        dest: "{{ bind.dir_name }}/bind_files[i]"
+        content: "{{ lookup(lookup_type, bind.file_name) }}"
+        owner: "{{ bind.file_owner | default(omit) }}"
+        group: "{{ bind.file_group | default(omit) }}"
+      register: bind_files
+  
+  - name: Linux | Copy Files to directory
+    when: bind.dir_contents is defined and bind.dir_contents|length > 0
+    block:
+
+    - name: Linux | Copy Files | Populate binding dir from dir_content
+      ansible.builtin.copy:
+        dest: "{{ bind.dir_name }}/{{ (dir_content.name | split('/'))[-1] | replace('.j2', '') }}"
+        content: "{{ lookup(('j2' in dir_content.name) | ternary('template', 'file'), dir_content.name) }}"
+        owner: "{{ dir_content.file_owner | default(omit) }}"
+        group: "{{ dir_content.file_group | default(omit) }}"
+      register: copied_files
+      loop: "{{ bind.dir_contents }}"
+      loop_control:
+        loop_var: dir_content

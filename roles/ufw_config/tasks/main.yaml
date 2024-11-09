@@ -1,0 +1,26 @@
+---
+#roles/ufw_config/tasks
+
+- name: Install UFW package
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+  tags:
+    - apt
+    - ufw
+  
+- name: Implement firewall rules
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    proto: "{{ item.proto }}"
+    port: "{{ item.port | default(omit) }}"
+    to_ip: "{{ item.to_ip | default(omit) }}"
+    from_ip: "{{ item.from_ip | default(omit) }}"
+    delete: "{{ item.delete | default(omit) }}"
+    comment: "{{ item.comment | default(omit) }}"
+  loop: 
+    "{{ ruleset }}"
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled

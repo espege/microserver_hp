@@ -1,0 +1,55 @@
+# roles/docker_app_preinstaller/tasks/main.yaml
+
+- name: Ansible | Docker prerequisites
+  tags:
+    - prerequisites
+  block:
+
+  - name: Assess required variables
+    ansible.builtin.assert:
+      that:
+        - app_name is defined
+        - app_name != ""
+      fail_msg: Missing mandatory variable
+      success_msg: All required variables found
+
+  - name: Linux | Directory
+    ansible.builtin.file:
+      path: "{{ app_parent_dir }}/{{ app_name }}"
+      state: '{{ (app_state == "present") | ternary("directory", "absent") }}'
+    tags: filesystem
+
+  - name: Linux | Bind Mount filesystem handling
+    when: svc_volumes.bind_mounts is defined and svc_volumes.bind_mounts|length > 0
+    tags: filesystem,volumes
+    block:
+
+    - name: Linux | Manage Directories
+      ansible.builtin.file:
+        path: "{{ dir.dir_name }}"
+        state: '{{ (app_state == "present") | ternary("directory", "absent") }}'
+        owner: "{{ dir.owner | default(omit) }}"
+        group: "{{ dir.owner | default(omit) }}"
+      loop: "{{ svc_volumes.bind_mounts }}"
+      loop_control:
+        loop_var: dir
+      register: bind_mounts_dirs
+
+    - name: Linux | Inspect bind for requirements
+      ansible.builtin.include_tasks:
+        file: "filesystem.yaml"
+      loop: "{{ svc_volumes.bind_mounts }}"
+      loop_control:
+        loop_var: bind
+        label: "{{ bind.dir_name }}"
+
+  - name: Linux | Manage User
+    ansible.builtin.user:
+      name: "{{ app_user }}"
+      comment: Created by ansible
+      shell: "{{ app_user_shell | default('/sbin/nologin') }}"
+      state: "{{ app_state }}"
+    register:
+      docker_app_user
+    tags: user
+    when: app_user is defined and app_user != ""

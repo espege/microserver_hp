@@ -1,0 +1,11 @@
+# subtasks/configure_storage.yaml
+- name: Call role configure_shared_storage
+  ansible.builtin.include_role:
+    name: configure_shared_storage
+  # vars: 
+  #   - pool: zfs_pool_name
+  #   - folders: pool_folders
+  tags:
+    - zfs
+    - facl
+    - directories

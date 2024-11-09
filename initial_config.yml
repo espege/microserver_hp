@@ -1,0 +1,14 @@
+---
+
+# ansible-playbook microserver/initial_config.yml -i inventory_newhost.ini --ask-pass --ask-become-pass
+
+- name: Playbook testing
+  hosts: microserver
+  become: true
+  remote_user: buntuadmin
+
+  tasks:
+
+    - name: Basic hostconfig
+      include_role:
+        name: hostconfig

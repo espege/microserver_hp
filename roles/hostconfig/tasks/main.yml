@@ -1,0 +1,27 @@
+#roles/hostconfig/tasks/main.yml
+---
+# To execute these tasks the first time around, you may need to supply --ask-become-pass, but not afterwards
+- name: Ubunutu | Basic config
+  block:
+  - name: Linux | Users | Create Ansible
+    user:
+      name: ansible
+      state: present
+      createhome: yes
+      shell: /bin/bash
+
+  - name: Linux | Sudoers | Add Ansible to file
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%ansible'
+      line: '%ansible ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+      
+  # Add public key to ansible user home
+  - name: Linux | Keys | Add ansible key file
+    authorized_key:
+      user: ansible
+      state: present
+      key: "{{ lookup('file', private_key_path) }}"
+    remote_user: ansible

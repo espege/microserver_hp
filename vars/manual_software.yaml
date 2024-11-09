@@ -1,0 +1,4 @@
+downloads:
+  - software: nordvpn
+    base_url: https://downloads.nordcdn.com/apps/linux/
+    name: install.sh

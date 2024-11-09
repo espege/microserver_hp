@@ -1,0 +1,15 @@
+# microserver/subtasks/configure_ansible_user.yml
+
+- name: Create ansible user
+  ansible.builtin.user:
+    name: "{{ users.ansible.name }}"
+    state: present
+    groups: sudo
+    
+- name: Add SSH key for user ansible
+  ansible.builtin.copy:
+    scr: "{{ users.ansible.key_path }}"
+    dest: "/home/{{ users.ansible.name }}/.ssh"
+    owner: "{{ users.ansible.name }}"
+    group: "{{ users.ansible.name }}"
+    mode: '0600'

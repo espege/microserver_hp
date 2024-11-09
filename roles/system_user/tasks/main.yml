@@ -1,0 +1,8 @@
+- name: Create service user
+  ansible.builtin.user:
+    name: "{{ user_name }}"
+    comment: "{{ user_comment  }}"
+    shell: "{{ shell }}"
+    system: yes
+    groups: "{{ user_groups | default(omit) }}"
+    state: "{{ state | default('present') }}"

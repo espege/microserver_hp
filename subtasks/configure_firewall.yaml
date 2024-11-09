@@ -1,0 +1,14 @@
+# subtasks/configure_firewall_rules.yaml
+
+- name: Configure UFW
+  include_role:
+    name: ufw_config
+  vars:
+    ruleset:
+      - rule: allow
+        proto: tcp
+        port: 22
+        from_ip: 192.168.0.0/24
+        to_ip: 192.168.0.50
+        comment: Allow private subnet SSH
+        delete: no

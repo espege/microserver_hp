@@ -1,0 +1,6 @@
+- name: Install Pihole
+  include_role:
+    name: docker_apps/pihole
+  vars:
+    local_router_domain: "{{ router_local_domain }}"
+

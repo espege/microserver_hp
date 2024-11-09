@@ -1,0 +1,7 @@
+
+software: 
+    - package: 'ufw'
+      check_svc: yes
+      repo: 
+      useraccount: 
+      signed_repo_info:

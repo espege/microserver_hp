@@ -1,0 +1,12 @@
+# roles/create_groups/tasks/main.yaml
+--- 
+- name: Fail
+  ansible.builtin.fail:
+    msg: "Missing mandatory variable mandatory_groups"
+  when: mandatory_groups is not defined
+
+- name: Ubuntu | Create groups
+  ansible.builtin.group: 
+    name: "{{ item }}"
+  loop:
+    "{{ mandatory_groups }}"

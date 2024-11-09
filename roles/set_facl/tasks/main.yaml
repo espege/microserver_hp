@@ -1,0 +1,18 @@
+# roles/set_facl/tasks
+
+- name: Fail when required variable is missing
+  ansible.builtin.fail:
+    msg: Cannot find required variable directories
+  when: directories is not defined
+
+
+- name: Linux | Set facl on directory
+  ansible.posix.acl:
+    path: /{{ zfs_pool_name }}/{{ item.facl.path }}/
+    entity: "{{ item.facl.entity }}"
+    etype: "{{ item.facl.etype }}"
+    permissions: "{{ item.facl.permissions }}"
+    default: "{{ item.facl.default }}"
+    state: "{{ item.facl.state }}"
+  loop: "{{ directories }}"
+  when: item.facl is defined

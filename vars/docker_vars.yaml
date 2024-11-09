@@ -1,0 +1,2 @@
+time_zone: America/Montreal
+docker_app_default_path: /src/docker

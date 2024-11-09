@@ -1,0 +1,28 @@
+- name: prerequisites
+
+  block:
+  - name: Add Docker GPG apt Key
+    tags:  
+    - prereqs
+    - docker
+    ansible.builtin.apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: "{{ desired_state }}"
+
+  - name: Add Docker Repository
+    ansible.builtin.apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu focal stable
+      state: "{{ desired_state }}"
+
+  - name: Docker install 
+    ansible.builtin.apt:
+      name: 
+        - docker-ce 
+      update_cache: yes 
+      state: "{{ desired_state }}"
+  
+  - name: Remove docker snap
+    community.general.snap:
+      name: 
+        - docker
+      state: absent

@@ -1,0 +1,28 @@
+---
+# roles/add_repo/tasks/main.yaml
+
+# Case 1: unsigned repos
+
+- name: soft | unsigned repo | apt source
+  ansible.builtin.apt_repository:
+    repo: "deb {{ item.url }} {{ item.release }} {{ item.branch }}"
+    state: present
+  loop: "{{ repositories }}"
+  when: (item.url != None) and (item.gpg_url is none) 
+
+# Case 2: signed repos
+- block:
+  - name: soft | repo | apt key
+    ansible.builtin.get_url:
+      url: "{{item.gpg_url}}"
+      dest: /usr/share/keyrings/{{ item.owner }}.asc
+    loop: "{{ repositories }}"
+    when: item.gpg_url != None
+
+  - name: soft | signed repo | apt source
+    ansible.builtin.apt_repository:
+      repo: "deb [signed-by=/usr/share/keyrings/{{ item.owner }}.asc] {{ item.url }} {{ item.release }} {{ item.branch }}"
+      state: present
+    loop: "{{ repositories }}"
+    when: item.gpg_url != None
+

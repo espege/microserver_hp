@@ -1,0 +1,5 @@
+vault
+pwd.ini
+private_keys/*
+.vault_pwd_file
+microserver.code-workspace

@@ -1,0 +1,45 @@
+---
+
+# ansible-playbook run_subtask.yaml -i inventory_prod.ini --vault-password-file=.vault_pwd_file
+
+- name: Playbook testing
+  hosts: microserver
+  become: true
+
+  vars: 
+    local_subnet_range: 192.168.0.0/24
+
+  vars_files:
+    - vars/required_software.yaml
+    - vars/manual_software.yaml
+    - vars/storage_pool.yaml
+    - vars/ubuntu_groups.yaml
+    - vars/users.yaml
+    - vars/service_accounts.yaml
+    - vars/cron_jobs.yaml
+    - vars/monitoring.yaml
+    - vars/credentials.yaml
+    - vars/actual_budget.yaml
+    - vars/docker_vars.yaml
+    - vars/core.yaml
+
+  tasks:
+    - name: Docker | Create containers
+      ansible.builtin.include_tasks:
+        file: "{{ task }}"
+      loop:
+        # - subtasks/docker/docker_noip.yaml
+        # - subtasks/docker/photoprism.yml
+        # - subtasks/docker/install_actual_budget.yml
+        # - subtasks/docker/install_plex.yaml
+        # - subtasks/docker/install_pihole.yaml
+        - subtasks/docker/install_grafana.yaml
+        # - subtasks/docker/install_onedrive.yaml
+        # - subtasks/docker/install_nordvpn.yml
+      loop_control:
+        loop_var: task
+
+    # - name: Ubuntu | Run a single substask file    
+      # ansible.builtin.import_tasks:
+        # file: subtasks/configure_zfs.yaml
+        # file: subtasks/configure_storage.yaml

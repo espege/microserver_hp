@@ -1,0 +1,60 @@
+---
+ # roles/configure_shared_storage/tasks/main.yml
+
+- name: Debug | Output pool name
+  ansible.builtin.debug:
+    msg: "Excecuting role configure_shared_storage and this is the value of zfs_pool_name {{ zfs_pool_name }}"
+  tags:
+    - always
+
+# - name: Debug | Output folders content
+#   ansible.builtin.debug:
+#     msg: "Excecuting role configure_shared_storage and this is the value of folders {{ pool_folders }}"
+#   tags:
+#     - always
+ 
+- name: Confirm storage pool directory exists
+  ansible.builtin.stat:
+    path: "/{{ zfs_pool_name }}"
+  register: pool_mounted
+  tags:
+    - always
+  
+- name: Linux | Check folder & permissions in {{ zfs_pool_name }}
+  block:
+    - name: Linux | Create non-existant folders
+      ansible.builtin.file:
+        state: directory
+        path: /{{zfs_pool_name}}/{{ item.key}}
+        owner: "{{ item.value.owner }}"
+        group: "{{ item.value.group }}"
+        mode: "{{ item.value.mode }}"
+        recurse: yes
+      loop: "{{ shared_directories }}"
+      loop_control:
+        label: /{{zfs_pool_name}}/{{ item.key}}
+      tags: directories
+    
+    - name: Linux | ACL | Configure ZFS for linux
+      ansible.builtin.shell:
+        cmd: |
+         zfs set acltype=posixacl {{ zfs_pool_name }}
+         zfs set xattr=sa {{ zfs_pool_name }}
+        # Uses normal Linux 
+        # Store file ACLs in iNode instead of in subfolder
+      tags: zfs
+
+    - name: Ensure acl installed
+      ansible.builtin.apt:
+        name: acl
+        
+  #   - name: Linux | Set facl on directories (outer loop)
+  #     ansible.builtin.include_tasks: facl.yml
+  #     loop: "{{ shared_directories }}"
+  #     loop_control:
+  #       label: "{{ outer_item.key }}"
+  #       loop_var: outer_item
+  #     when: outer_item.value.facl is defined
+  #     tags: facl
+
+  # when: pool_mounted.stat.isdir is defined and pool_mounted.stat.isdir

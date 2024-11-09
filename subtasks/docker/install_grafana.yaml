@@ -1,0 +1,5 @@
+# subtasks/docker/install_grafana.yaml
+
+- name: Ansible | Role | Install Grafana
+  include_role:
+    name: docker_apps/grafana

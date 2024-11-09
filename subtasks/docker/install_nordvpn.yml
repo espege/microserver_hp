@@ -1,0 +1,5 @@
+# subtasks/install_nordvpn.yml
+
+- name: Install NordVPN
+  include_role:
+    name: docker_apps/nordvpn

@@ -1,0 +1,6 @@
+repositories: 
+    - owner: 'plex'
+      gpg_url: https://downloads.plex.tv/plex-keys/PlexSign.key
+      url: https://downloads.plex.tv/repo/deb 
+      release: public
+      branch: main

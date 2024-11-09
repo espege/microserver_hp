@@ -1,0 +1,26 @@
+# roles/zfs/tasks
+
+- name: Linux | apt | install package
+  ansible.builtin.apt:
+    name: zfsutils-linux
+    state: present
+
+- name: Linux | Check ZFS pool micropool
+  community.general.zfs:
+    name: micropool
+    state: present
+  check_mode: true
+
+- name: Ensure /micropool has a mountpoint
+  ansible.builtin.file:
+    path: /mnt/micropool
+    state: directory
+
+- name: Ensure /micropool is in fstab for automount
+  ansible.posix.mount:
+    path: "{{ mount_point }}"
+    src: /dev/{{ vg_name}}/{{ lvm_name }}
+    fstype: ext4
+    opts: defaults
+    state: mounted
+  register: mounted_lvm
