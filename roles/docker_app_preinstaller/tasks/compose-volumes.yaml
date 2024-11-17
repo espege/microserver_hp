@@ -1,0 +1,49 @@
+# roles/docker_app_preinstaller/tasks/compose-directories.yaml
+# loop_var: compose_volume
+
+# Ensure volumes references in docker-compose exist on localhost
+
+- name: Fact | Is this a directory
+  ansible.builtin.set_fact:
+    compose_volumes: "{{ compose_definition.services | dict2items | selectattr('value.volumes', 'defined') | map(attribute='value.volumes')  | list | flatten | unique }}"
+
+- name: Create directories 
+  ansible.builtin.file: 
+    path: "{{ var_volume.path.endswith('/') | ternary(var_volume.path, (var_volume.path | split('/'))[0:-2]) }}" 
+    state: '{{ (app_state == "present") | ternary("directory", "absent") }}'
+    owner: "{{ var_volume.dir_owner | default(omit) }}" 
+    group: "{{ var_volume.dir_group | default(omit) }}" 
+    recurse: '{{ (app_state == "present") | ternary(true, false) }}' # Don't delete too much
+  loop: "{{ volume_contents }}"
+  loop_control:
+    loop_var: var_volume
+  when: var_volume.path in compose_volumes | map(attribute='source')
+  tags: 
+    - directories
+    - docker_vol
+
+- name: Create files in directories 
+  ansible.builtin.copy: 
+    dest: "{{ file.location | replace('.j2','') }}" 
+    content: "{{ lookup('template', (file.location | split('/'))[-1]) }}" 
+    owner: "{{ file.file_owner | default(omit) }}" 
+    group: "{{ file.file_group | default(omit) }}" 
+  loop: >-
+    {%- set results = [] -%}
+    {%- for directory in volume_contents -%}
+    {%- for file in directory.files -%}
+    {%- set _ = results.append({
+      "location": directory.path + '/' + (file.location | basename),
+      "file_owner": file.file_owner,
+      "file_group": file.file_group
+    }) %}
+    {%- endfor -%}
+    {%- endfor -%}
+    {{ results }}
+  loop_control: 
+    loop_var: file
+  tags: 
+    - files
+    - docker_vol
+
+  
