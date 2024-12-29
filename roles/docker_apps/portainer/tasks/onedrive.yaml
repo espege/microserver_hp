@@ -1,0 +1,41 @@
+# - name: Filesystem | Create volume for /onedrive/storage
+#   ansible.builtin.include_role:
+#     name: configure_shared_storage
+#   vars: 
+#     shared_directories: # Needs to be dict2items
+#       onedrive:
+#         owner: onedrive
+#         group: onedrive # Created in docker app onedrive
+#         mode: '2770'
+#         facl:
+#           media:
+#             entity: "{{ media_group }}"
+#             state: present
+#             permissions: r
+#             etype: group
+#             default: yes
+#             recalculate_mask: mask
+#           mask:
+#             etype: mask
+#             state: present
+#             permissions: r
+#             default: no
+#             recalculate_mask: mask
+#   tags:
+#     - zfs
+#     - facl
+#     - directories
+
+- name: Ansible | Load variables for current host
+  ansible.builtin.include_vars:
+    file: defaults/{{ task_name }}
+
+- name: Filesystem | Create required filestructure
+  ansible.builtin.include_tasks:
+    file: directory_create.yaml
+  when: docker_directories
+
+- name: Linux | Create docker user
+  ansible.builtin.include_tasks:
+    file: user_create.yaml
+  when: docker_user is defined or docker_group is defined

@@ -1,0 +1,19 @@
+
+- name: Linux | Copy the cronjob script
+  ansible.builtin.template:
+    src: docker_backup.sh.j2
+    dest: docker_backup.sh
+    mode: "760"
+    owner: ansible
+  become: false
+
+- name: Create an cron job entry
+  ansible.builtin.cron:
+    name: "Backup docker default directory | Ansible Created"
+    minute: "15"
+    hour: "07"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: "/home/ansible/docker_backup.sh"
+    state: "present"

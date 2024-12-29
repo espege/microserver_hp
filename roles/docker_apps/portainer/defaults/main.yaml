@@ -1,0 +1,13 @@
+app_state: present
+portainer:
+  image_name: portainer-ce
+  image_tag: alpine
+  network: portainer
+  app_name: portainer
+  install_status: present
+  environment_variables: 
+    - TIME_ZONE={{ time_zone }}
+    - ZFS_POOL_MOUNT_POINT={{ zfs_pool_name }}
+    - LOCAL_DOMAIN_NAME={{ local_domain_name }}
+    - PUBLIC_DOMAIN_NAME={{ public_domain_name }}
+    - PUBLIC_EMAIL={{ public_email }}

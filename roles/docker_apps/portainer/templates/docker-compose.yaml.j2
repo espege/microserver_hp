@@ -1,0 +1,45 @@
+services:
+  portainer:
+    image: portainer/{{ portainer.image_name }}:{{ portainer.image_tag }}
+    container_name: portainer
+    restart: always
+    ports:
+      - "8000:8000"
+      - "9443:9443"
+    networks: 
+      - {{ portainer.network }}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.{{ portainer.app_name }}.rule=Host(`{{ portainer.app_name }}.{{ public_domain_name }}`)
+      - traefik.http.routers.{{ portainer.app_name }}.entrypoints=websecure
+      - traefik.http.routers.{{ portainer.app_name }}.tls=true
+      - traefik.http.services.{{ portainer.app_name }}.loadbalancer.server.port=9443
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: {{ docker_app_default_path }}/{{ portainer.app_name }}/data
+        target: /data
+    environment: {{ portainer.environment_variables }}
+    
+  portainer_agent:
+    image: portainer/agent:{{ portainer.image_tag }}
+    container_name: portainer_agent
+    networks: 
+      - {{ portainer.network }}
+    restart: always
+    ports:
+      - "9001:9001" # Don't expose on host
+    volumes:
+      - type: bind
+        source: /src/docker/portainer/data
+        target: /data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+      - /:/host
+
+networks:
+  {{ portainer.network }}:
+    name: {{ portainer.network }}
+    driver: bridge
+    enable_ipv6: false

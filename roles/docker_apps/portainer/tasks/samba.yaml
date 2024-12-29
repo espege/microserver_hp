@@ -1,0 +1,12 @@
+--- 
+# roles/docker_apps/portainer/tasks/samba.yaml
+
+- name: Ansible | Load variables for current host
+  ansible.builtin.include_vars:
+    file: defaults/{{ task_name }}
+
+- name: Ubuntu | Firewall | Samba Firewall config
+  include_role:
+    name: ufw_config
+  vars:
+    ruleset: "{{ ufw_rules }}"

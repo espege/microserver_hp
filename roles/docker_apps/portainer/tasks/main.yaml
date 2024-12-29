@@ -1,0 +1,27 @@
+# roles/docker_apps/portainer/tasks/main.yaml
+
+- name: Roles_path
+  ansible.builtin.set_fact:
+    original_role_path: "{{ role_path }}"
+
+- name: Docker | Create Prerequisites for portainer apps
+  ansible.builtin.include_tasks:
+    file: "{{ task_name }}"
+  loop:
+    - onedrive.yaml
+    - samba.yaml
+  loop_control:
+    loop_var: task_name
+
+- name: Docker install | App {{ portainer.app_name }} | Call role docker_app_preinstaller
+  ansible.builtin.include_role:
+    name: docker_app_preinstaller
+  vars:
+    app_name: "{{ portainer.app_name }}"
+    original_files_path: "{{ original_role_path }}"
+    project: "{{ portainer.app_name }}"
+    compose_definition: "{{ lookup('ansible.builtin.template', 'templates/docker-compose.yaml.j2') | from_yaml }}"
+
+- name: Linux | Add cronjobs
+  ansible.builtin.include_tasks:
+    file: cron_jobs.yaml

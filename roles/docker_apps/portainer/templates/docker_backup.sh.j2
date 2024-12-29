@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Define variables
+SOURCE_DIR="{{ docker_app_default_path }}"
+BACKUP_DIR="/{{ zfs_pool_name }}/OneDrive/Backups"
+TARBALL="$BACKUP_DIR/backup.tar.gz"
+USER="onedrive"
+GROUP="onedrive"
+
+# Create the tarball as root
+sudo tar -czf "$TARBALL" -C "$BACKUP_DIR" .
+
+# Change the ownership to onedrive
+sudo chown "$USER:$GROUP" "$TARBALL"
+
+echo "Backup completed and moved to $BACKUP_DIR"

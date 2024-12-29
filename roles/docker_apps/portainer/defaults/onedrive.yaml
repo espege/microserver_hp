@@ -1,0 +1,9 @@
+docker_app: onedrive
+docker_app_desired_state: present
+docker_user: onedrive
+docker_directories:
+  - path: "{{ docker_app_default_path }}/{{ docker_app }}"
+    state: directory
+    owner: "{{ docker_user }}" 
+    group: "{{ docker_user }}" 
+    mode: "0755"
