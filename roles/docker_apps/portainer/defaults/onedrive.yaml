@@ -1,9 +1,25 @@
 docker_app: onedrive
 docker_app_desired_state: present
 docker_user: onedrive
-docker_directories:
-  - path: "{{ docker_app_default_path }}/{{ docker_app }}"
+docker_directories: # Only create dir with ansible if files are required in them, otherwise let portainer handle
+  - path: "{{ docker_app_default_path }}/{{ docker_app }}/config"
     state: directory
     owner: "{{ docker_user }}" 
     group: "{{ docker_user }}" 
     mode: "0755"
+    templates: 
+      - templates/{{ docker_app }}/config.j2
+      - templates/{{ docker_app }}/sync_list.j2
+  - path: "/{{ zfs_pool_name }}/OneDrive"
+    state: directory
+    owner: "{{ docker_user }}" 
+    group: "{{ docker_user }}" 
+    recurse: true
+    mode: 4770
+
+onedrive_config:
+  monitor_interval: 43200
+  rate_limit: 10485760
+  sync_dir: "/onedrive/data"
+  sync_dir_permissions: "770"
+  sync_file_permissions: "770"

@@ -1,0 +1,10 @@
+---
+
+- name: Filesystem | Apply templates for each docker directory
+  become: true
+  ansible.builtin.template:
+    src: "{{ template }}"
+    dest: "{{ directory.path }}/{{ template | basename | replace('.j2', '')}}"
+  loop: "{{ directory.templates }}"
+  loop_control:
+    loop_var: template

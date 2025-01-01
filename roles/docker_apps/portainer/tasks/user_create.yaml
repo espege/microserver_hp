@@ -1,0 +1,15 @@
+---
+
+- name: Linux | Manage User
+  ansible.builtin.user:
+    name: "{{ docker_user }}"
+    append: "{{ docker_user_append_extra_groups is defined | default(omit) }}"
+    groups: "{{ docker_user_extra_groups | default(omit) }}"
+    comment: Created by ansible
+    shell: "{{ app_user_shell | default('/sbin/nologin') }}"
+    state: "{{ app_state }}"
+  register:
+    docker_app_user
+  when: docker_user is defined and docker_user != ""
+  tags: 
+    - user

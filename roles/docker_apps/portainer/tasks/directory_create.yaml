@@ -1,0 +1,44 @@
+---
+
+- name: Filesystem | Create volume
+  become: true
+  ansible.builtin.file: 
+    path: "{{ directory.path | default(docker_app_default_path + '/' + docker_app) }}" 
+    state: '{{ (docker_app_desired_state == "present") | ternary("directory", "absent") }}'
+    owner: "{{ directory.owner | default(omit) }}" 
+    group: "{{ directory.group | default(omit) }}" 
+    mode: "{{ directory.mode | default(omit) }}"
+    recurse: "{{ directory.recurse | default(omit) }}"
+  loop: "{{ docker_directories }}"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory.path }}" 
+  tags: 
+    - directories
+    - docker_volume
+
+# - name: Filesystem | Set facl
+#   become: true
+#   ansible.builtin.include_tasks:
+#     file: "facl.yaml"
+#   loop: "{{ docker_directories }}"
+#   loop_control:
+#     loop_var: directory
+#     label: "{{ directory.path }}" 
+#   tags: 
+#     - directories
+#     - docker_volume
+#     - facl
+#   when: directory.facl is defined
+
+- name: Filesystem | Create files in directory from templates
+  ansible.builtin.include_tasks:
+    file: "templates.yaml"
+  loop: "{{ docker_directories }}"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory.path }}" 
+  tags: 
+    - directories
+    - docker_volume
+  when: directory.templates is defined and directory.templates | length > 0

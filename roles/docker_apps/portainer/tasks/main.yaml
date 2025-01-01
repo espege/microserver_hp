@@ -6,7 +6,7 @@
 
 - name: Docker | Create Prerequisites for portainer apps
   ansible.builtin.include_tasks:
-    file: "{{ task_name }}"
+    file: docker_apps/{{ task_name }}
   loop:
     - onedrive.yaml
     - samba.yaml
@@ -17,6 +17,7 @@
   ansible.builtin.include_role:
     name: docker_app_preinstaller
   vars:
+    # compose_recreate: always
     app_name: "{{ portainer.app_name }}"
     original_files_path: "{{ original_role_path }}"
     project: "{{ portainer.app_name }}"
