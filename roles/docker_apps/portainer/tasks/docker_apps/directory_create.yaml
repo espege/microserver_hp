@@ -17,23 +17,25 @@
     - directories
     - docker_volume
 
-# - name: Filesystem | Set facl
-#   become: true
-#   ansible.builtin.include_tasks:
-#     file: "facl.yaml"
-#   loop: "{{ docker_directories }}"
-#   loop_control:
-#     loop_var: directory
-#     label: "{{ directory.path }}" 
-#   tags: 
-#     - directories
-#     - docker_volume
-#     - facl
-#   when: directory.facl is defined
+- name: Filesystem | Set facl
+  ansible.builtin.include_tasks:
+    file: "docker_apps/facl.yaml"
+  loop: "{{ docker_directories }}"
+  loop_control:
+    loop_var: directory
+    label: "{{ directory.path }}" 
+  tags: 
+    - directories
+    - docker_volume
+    - facl
+  when: directory.facl is defined
+
+- debug: var=docker_app
+- debug: var=directory
 
 - name: Filesystem | Create files in directory from templates
   ansible.builtin.include_tasks:
-    file: "templates.yaml"
+    file: "docker_apps/templates.yaml"
   loop: "{{ docker_directories }}"
   loop_control:
     loop_var: directory

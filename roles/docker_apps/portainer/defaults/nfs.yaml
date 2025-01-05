@@ -1,0 +1,9 @@
+docker_app: nfs
+docker_app_desired_state: present
+ufw_rules:
+  - rule: allow
+    proto: tcp
+    port: "2049"
+    from_ip: 192.168.0.0/24
+    to_ip: "{{ ansible_host }}"
+    comment: Allow NFS from local domain

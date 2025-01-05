@@ -1,0 +1,20 @@
+---
+# roles/docker_apps/portainer/tasks/facl.yaml
+
+- name: Posix | Set new ACL values
+  become: true
+  ansible.posix.acl:
+    path: "{{ directory.path }}"
+    entity: "{{ facl.entity | default('') }}"
+    etype: "{{ facl.etype }}"
+    permissions: "{{ facl.permissions }}"
+    default: "{{ facl.default | default('false') }}"
+    state: "{{ facl.state | default('query') }}"
+    recalculate_mask: "{{ facl.recalculate_mask | default('default') }}"
+    recursive: "{{ facl.recursive | default('false') }}"
+  loop: "{{ directory.facl }}"
+  loop_control:
+    loop_var: facl
+    label: "{{ facl.entity }} {{ facl.etype }} {{ facl.permissions }}" 
+  tags: facl
+  when: facl is defined

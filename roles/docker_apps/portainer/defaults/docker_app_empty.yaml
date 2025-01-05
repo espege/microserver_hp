@@ -1,0 +1,4 @@
+docker_app: ""
+docker_app_desired_state: ""
+docker_user: ""
+docker_directories: []

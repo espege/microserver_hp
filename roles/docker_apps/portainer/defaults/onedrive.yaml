@@ -14,8 +14,21 @@ docker_directories: # Only create dir with ansible if files are required in them
     state: directory
     owner: "{{ docker_user }}" 
     group: "{{ docker_user }}" 
-    recurse: true
-    mode: 4770
+    recurse: false
+    mode: 2770
+    facl:
+      - entity: "{{ docker_user }}"
+        etype: "group"
+        permissions: "rwx"
+        state: present
+        default: true
+        recursive : true
+      - entity: "ansible"
+        etype: "user"
+        permissions: "rx"
+        state: present
+        default: true
+        recursive : true
 
 onedrive_config:
   monitor_interval: 43200
